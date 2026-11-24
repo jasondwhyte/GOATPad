@@ -455,9 +455,15 @@ class SyncEngine {
       // have seen, so it is the common one if their edit crosses this
       // upload. Without it, a record only ever uploaded from here has none,
       // and an edit made to what another computer downloaded would count as
-      // a conflict.
-      final synced = state.version == null ? null : state.base;
-      final commonVersion = synced == null ? null : state.version;
+      // a conflict. Only an upload's own version and data go together: what
+      // a download left as the base came from elsewhere, and its version
+      // and data are already kept as the common pair.
+      final uploaded =
+          state.version != null &&
+          state.base != null &&
+          state.base != state.common;
+      final commonVersion = uploaded ? state.version : null;
+      final synced = uploaded ? state.base : null;
       // If it changed while it was being written, it stays pending, and the
       // next round uploads it again.
       _store.saveSyncState(
