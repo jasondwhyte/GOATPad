@@ -38,8 +38,11 @@ class Notepad extends ChangeNotifier {
     this._folders,
     this._selectedId,
     Appearance appearance,
-  ) : appearance = ValueNotifier(appearance) {
+    bool showShortcuts,
+  ) : appearance = ValueNotifier(appearance),
+      showShortcuts = ValueNotifier(showShortcuts) {
     this.appearance.addListener(_saveAppearance);
+    this.showShortcuts.addListener(_saveShowShortcuts);
   }
 
   /// Loads the notes in [store], deleting any that have been in the trash
@@ -86,6 +89,7 @@ class Notepad extends ChangeNotifier {
       folders,
       store.setting(_selectedKey),
       _loadAppearance(store.setting(_appearanceKey)),
+      store.setting(_shortcutsKey) != '0',
     );
   }
 
@@ -97,6 +101,7 @@ class Notepad extends ChangeNotifier {
   static const _welcomedKey = 'welcomed';
   static const _selectedKey = 'selected_note';
   static const _appearanceKey = 'appearance';
+  static const _shortcutsKey = 'show_shortcuts';
 
   final NoteStore _store;
   final DateTime Function() _clock;
@@ -114,6 +119,10 @@ class Notepad extends ChangeNotifier {
 
   /// Theme, light or dark, and code colors. Saved whenever they change.
   final ValueNotifier<Appearance> appearance;
+
+  /// Whether the sidebar lists the keyboard shortcuts. Shown until hidden,
+  /// and saved whenever it changes.
+  final ValueNotifier<bool> showShortcuts;
 
   /// Called after each save that wrote something, so sync can upload it.
   VoidCallback? onSaved;
@@ -723,6 +732,9 @@ class Notepad extends ChangeNotifier {
     appearance
       ..removeListener(_saveAppearance)
       ..dispose();
+    showShortcuts
+      ..removeListener(_saveShowShortcuts)
+      ..dispose();
     super.dispose();
   }
 
@@ -835,6 +847,11 @@ class Notepad extends ChangeNotifier {
 
   void _saveAppearance() {
     _unsavedSettings[_appearanceKey] = jsonEncode(appearance.value.toJson());
+    flush();
+  }
+
+  void _saveShowShortcuts() {
+    _unsavedSettings[_shortcutsKey] = showShortcuts.value ? '1' : '0';
     flush();
   }
 
