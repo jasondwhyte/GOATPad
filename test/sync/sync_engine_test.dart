@@ -168,8 +168,7 @@ void main() {
     expect(work.note('Plan, renamed').text, 'home edit');
   });
 
-  test('a revert at one computer survives a crossed upload from another',
-      () async {
+  test('a revert survives a crossed upload', () async {
     final note = work.write('Plan', 'original');
     await work.sync();
     work.notepad.editText(note, 'revised');
