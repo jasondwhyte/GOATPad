@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:goatpad/src/app.dart';
 import 'package:goatpad/src/notepad/notepad.dart';
@@ -42,6 +43,8 @@ void main() {
 
     // The choice is saved, and a restart keeps it.
     notepad.flush();
+    await tester.pumpWidget(const SizedBox.shrink());
+    notepad.dispose();
     final restarted = await _pumpApp(tester, store);
     expect(restarted.showShortcuts.value, isFalse);
     expect(find.text('Ctrl+Shift+V'), findsNothing);
