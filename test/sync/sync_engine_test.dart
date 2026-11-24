@@ -168,6 +168,30 @@ void main() {
     expect(work.note('Plan, renamed').text, 'home edit');
   });
 
+  test('a revert at one computer survives a crossed upload from another',
+      () async {
+    final note = work.write('Plan', 'original');
+    await work.sync();
+    work.notepad.editText(note, 'revised');
+    await work.sync();
+    final file = Directory(p.join(folder, 'records')).listSync().single;
+    final revised = File(file.path).readAsBytesSync();
+    await home.sync();
+
+    // Work goes back to the first text. Home's upload, made from the
+    // revised version, crosses with it.
+    work.notepad.editText(note, 'original');
+    await work.sync();
+    File(file.path).writeAsBytesSync(revised);
+    home.notepad.rename(home.note('Plan'), 'Plan, renamed');
+    await home.sync();
+
+    final report = await work.sync();
+    expect(report.conflicts, 0);
+    expect(work.titles, ['Plan, renamed']);
+    expect(work.note('Plan, renamed').text, 'original');
+  });
+
   test('a note changed on both machines is kept twice', () async {
     work.write('Plan', 'v1');
     await work.sync();
