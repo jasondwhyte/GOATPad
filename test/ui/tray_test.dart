@@ -245,6 +245,38 @@ void main() {
     await finish(tester, sync);
   });
 
+  testWidgets('what is typed while quitting uploads is saved too', (
+    tester,
+  ) async {
+    final runner = _Runner();
+    addTearDown(runner.stop);
+    final (notepad, sync, _) = await pumpApp(tester, runner);
+    final note = notepad.newNote();
+    notepad.editText(note, 'typed, then quit from the tray');
+
+    // More is typed as the upload ends, with the window open: after the
+    // sync round's own last save, so only quitting can save it.
+    var started = false;
+    var typed = false;
+    void typeMore() {
+      if (sync.status == SyncStatus.syncing) started = true;
+      if (typed || !started || sync.status != SyncStatus.synced) return;
+      typed = true;
+      notepad.editText(note, 'typed, then quit, then more');
+    }
+
+    sync.addListener(typeMore);
+    await tester.runAsync(() => runner.choose('quit'));
+    sync.removeListener(typeMore);
+    expect(typed, isTrue);
+    expect(runner.exits, 1);
+    expect(
+      notepad.store.loadNotes().map((n) => n.text),
+      contains('typed, then quit, then more'),
+    );
+    await finish(tester, sync);
+  });
+
   testWidgets('the setting is in the sync window', (tester) async {
     final runner = _Runner();
     addTearDown(runner.stop);

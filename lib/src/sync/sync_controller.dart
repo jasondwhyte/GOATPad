@@ -918,6 +918,11 @@ class SyncController extends ChangeNotifier {
         );
       } on SyncException catch (e) {
         _fail(engine, e.message);
+      } catch (e) {
+        // Anything else (a database that can't be written, a file that
+        // doesn't decode) would leave the status on "syncing" for good and
+        // escape from the timers that start rounds.
+        _fail(engine, 'Syncing stopped because of an unexpected problem: $e');
       }
       // Missing or replaced vault files are reported by _checkVault.
     } while (_again && !_disposed);

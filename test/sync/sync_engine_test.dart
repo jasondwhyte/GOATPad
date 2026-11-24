@@ -145,6 +145,52 @@ void main() {
     expect(note.textVersion, greaterThan(version));
   });
 
+  test('edits to different parts merge, even when the other computer '
+      'started from an older upload of ours', () async {
+    work.write('Plan', 'v1');
+    await work.sync();
+    final file = Directory(p.join(folder, 'records')).listSync().single;
+    final first = File(file.path).readAsBytesSync();
+    await home.sync();
+
+    // Work renames the note and uploads it. Another tool then puts the
+    // first version back (a restored backup, say), as if home's upload
+    // had crossed with it.
+    work.notepad.rename(work.note('Plan'), 'Plan, renamed');
+    await work.sync();
+    File(file.path).writeAsBytesSync(first);
+    home.notepad.editText(home.note('Plan'), 'home edit');
+    await home.sync();
+
+    final report = await work.sync();
+    expect(report.conflicts, 0);
+    expect(work.titles, ['Plan, renamed']);
+    expect(work.note('Plan, renamed').text, 'home edit');
+  });
+
+  test('a revert survives a crossed upload', () async {
+    final note = work.write('Plan', 'original');
+    await work.sync();
+    work.notepad.editText(note, 'revised');
+    await work.sync();
+    final file = Directory(p.join(folder, 'records')).listSync().single;
+    final revised = File(file.path).readAsBytesSync();
+    await home.sync();
+
+    // Work goes back to the first text. Home's upload, made from the
+    // revised version, crosses with it.
+    work.notepad.editText(note, 'original');
+    await work.sync();
+    File(file.path).writeAsBytesSync(revised);
+    home.notepad.rename(home.note('Plan'), 'Plan, renamed');
+    await home.sync();
+
+    final report = await work.sync();
+    expect(report.conflicts, 0);
+    expect(work.titles, ['Plan, renamed']);
+    expect(work.note('Plan, renamed').text, 'original');
+  });
+
   test('a note changed on both machines is kept twice', () async {
     work.write('Plan', 'v1');
     await work.sync();

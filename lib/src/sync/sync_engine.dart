@@ -451,6 +451,19 @@ class SyncEngine {
       }
       _tooLarge.remove(state.id);
       final file = await _step(backend.write(state.id, sealed));
+      // What was synced last is the newest version another computer can
+      // have seen, so it is the common one if their edit crosses this
+      // upload. Without it, a record only ever uploaded from here has none,
+      // and an edit made to what another computer downloaded would count as
+      // a conflict. Only an upload's own version and data go together: what
+      // a download left as the base came from elsewhere, and its version
+      // and data are already kept as the common pair.
+      final uploaded =
+          state.version != null &&
+          state.base != null &&
+          state.base != state.common;
+      final commonVersion = uploaded ? state.version : null;
+      final synced = uploaded ? state.base : null;
       // If it changed while it was being written, it stays pending, and the
       // next round uploads it again.
       _store.saveSyncState(
@@ -460,6 +473,8 @@ class SyncEngine {
         version: jsonEncode(version.toJson()),
         base: jsonEncode(data),
         remoteTag: file.tag,
+        commonVersion: commonVersion,
+        common: synced,
       );
       report.uploaded++;
     }

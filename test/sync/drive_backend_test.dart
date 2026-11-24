@@ -269,6 +269,25 @@ void main() {
       expect(drive.tagged('records'), hasLength(1));
     });
 
+    test('a failed check after the vault is up leaves it', () async {
+      // The vault file is already there for other computers to find, so a
+      // failed check of who won mustn't delete the folder it sits in.
+      drive.before = (request) async {
+        if (request.method == 'POST' &&
+            request.url.path.startsWith('/upload/')) {
+          drive.failNext('GET', '/drive/v3/files', 400);
+        }
+      };
+      await expectLater(
+        backend().createVault(header()),
+        throwsA(isA<SyncBackendException>()),
+      );
+      drive.before = null;
+      expect(drive.tagged('vault'), hasLength(1));
+      expect(drive.tagged('folder'), hasLength(1));
+      expect(await backend().readVault(), header());
+    });
+
     test('of two setting up at once, exactly one wins', () async {
       for (var round = 0; round < 20; round++) {
         drive = FakeDrive();
@@ -571,9 +590,9 @@ void main() {
       await work.sync();
       await home.sync();
       await work.sync();
-      // One file per note again. Home's copy came back without the change
-      // made at work, from a version work can't place, so its text is kept
-      // too, as it would be through a sync folder.
+      // One file per note again. Home's copy came back with the text work
+      // had uploaded before the change, a version work knows as the one
+      // they shared, so it is no edit of home's and nothing is kept twice.
       final names = [for (final f in drive.tagged('record')) f.name];
       expect(names.toSet(), hasLength(names.length));
       Map<String, String> notes(Notepad pad) => {
@@ -582,8 +601,8 @@ void main() {
       expect(notes(workPad), notes(homePad));
       expect(notes(workPad), containsPair('Plan', 'v2 from work'));
       expect(
-        notes(workPad),
-        containsPair('Plan (conflict from Home laptop)', 'v1'),
+        workPad.keptNotes.where((n) => n.title.startsWith('Plan')),
+        hasLength(1),
       );
     });
 

@@ -725,8 +725,8 @@ GPad runs nothing it hasn't checked against a key built into it.
 - **The manifest.** Each release holds `gpad-update.json`: its version, and
   each download's name, size and SHA-256. CI signs it with an Ed25519 key
   (`gpad-update.json.sig`, made with OpenSSL), whose private half is the
-  `GPAD_UPDATE_SIGNING_KEY` repository secret. The public half is
-  `tool/update_public_key.pem`, which CI builds into GPad along with the
+  `GPAD_UPDATE_SIGNING_KEY` secret of the `release` environment. The public
+  half is `tool/update_public_key.pem`, which CI builds into GPad along with the
   repository's name. A build without them, like one from `flutter run`,
   doesn't update itself.
 - **Checking.** Thirty seconds after starting, then every twelve hours (or

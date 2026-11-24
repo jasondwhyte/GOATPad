@@ -331,6 +331,33 @@ void main() {
     expect(home.keptNotes.map((n) => n.text), isNot(contains('from work')));
   });
 
+  test('an unexpected error stops the round with a message', () async {
+    final work = Notepad.load(NoteStore.inMemory());
+    final gate = _Gate();
+    final sync = controllerFor(work, gate: gate);
+    final folder = p.join(chosen, 'GPad');
+    await Directory(folder).create();
+    await sync.create(
+      place: FolderPlace(folder),
+      passphrase: passphrase,
+      deviceName: 'Work PC',
+      remember: false,
+    );
+    await settle(sync);
+
+    gate.writeError = StateError('disk exploded');
+    work.editText(work.newNote(), 'typed');
+    work.flush();
+    await sync.syncNow();
+    expect(sync.status, SyncStatus.problem);
+    expect(sync.problem, contains('disk exploded'));
+
+    // And the next round, once the trouble is over, goes through.
+    gate.writeError = null;
+    await sync.syncNow();
+    expect(sync.status, SyncStatus.synced);
+  });
+
   test('a round cut short leaves nothing behind for the next setup', () async {
     final work = Notepad.load(NoteStore.inMemory());
     final gate = _Gate();
@@ -738,6 +765,9 @@ class _Gate {
   bool reads = false;
   bool writes = false;
 
+  /// Thrown by the next writes, as an error nobody planned for.
+  Object? writeError;
+
   /// Runs before the vault file is replaced, as another computer would.
   Future<void> Function()? beforeReplacingVault;
   final _reached = Completer<void>();
@@ -771,6 +801,8 @@ class _GatedBackend implements SyncBackend {
 
   @override
   Future<RemoteFile> write(String recordId, Uint8List bytes) async {
+    final error = gate.writeError;
+    if (error != null) throw error;
     final written = await inner.write(recordId, bytes);
     await gate._pass(gate.writes);
     return written;

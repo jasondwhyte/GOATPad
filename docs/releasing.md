@@ -17,24 +17,33 @@ It writes the private key to `gpad-update-signing-key.pem`, which git
 ignores, and the public key to `tool/update_public_key.pem`. It won't
 replace a key that is already there. Then:
 
-1. Add the private key as the repository secret `GPAD_UPDATE_SIGNING_KEY`
-   (**Settings → Secrets and variables → Actions → New repository
-   secret**), pasting the whole file, `BEGIN` and `END` lines included.
+1. Make an environment called `release` (**Settings → Environments → New
+   environment**), and under **Deployment branches and tags** choose
+   **Selected branches and tags** and add `main` and the tag pattern `v*`.
+   The release job runs in it, so only those can use the key: a branch, or
+   a pull request's edited copy of the workflow, can't get at it. Adding
+   yourself under **Required reviewers** asks for a tap before each
+   release job (dry runs too) as well.
+2. Add the private key as the secret `GPAD_UPDATE_SIGNING_KEY` of that
+   environment (**Add environment secret**), pasting the whole file,
+   `BEGIN` and `END` lines included. (Don't also keep it as a repository
+   secret, which every branch could read. The Google secrets below stay
+   repository secrets.)
    Copying it straight to the clipboard is safest, since a selection can
    miss a line and a word processor or chat app can change dashes and
    spaces: `clip < gpad-update-signing-key.pem` on Windows (in Git Bash),
    `xclip -selection clipboard < gpad-update-signing-key.pem` or
    `wl-copy < gpad-update-signing-key.pem` on Linux. With the GitHub CLI,
-   `gh secret set GPAD_UPDATE_SIGNING_KEY < gpad-update-signing-key.pem`
-   sets it with no copying at all.
+   `gh secret set GPAD_UPDATE_SIGNING_KEY --env release < gpad-update-signing-key.pem`
+   sets it in the environment with no copying at all.
    If you have more than one key file, the right one is the file for which
    `openssl pkey -in <file> -pubout` prints `tool/update_public_key.pem`.
    A [dry run](#a-dry-run) checks the secret and says what's wrong with it.
-2. Keep the file somewhere safe and private, like a password manager, and
+3. Keep the file somewhere safe and private, like a password manager, and
    delete it from where you made it. Anyone with it, and the means to
    publish a release here, can sign updates GPad installs. Without it,
    builds already out can't update to the next release on their own.
-3. Commit `tool/update_public_key.pem`. Builds from then on carry it, and
+4. Commit `tool/update_public_key.pem`. Builds from then on carry it, and
    update only to releases signed with its private key.
 
 ## Once: the Google sign-in client
@@ -85,7 +94,9 @@ fix mistakes with a new version instead.
 ## A dry run
 
 To try the whole release without making one, run CI by hand on a branch:
-**Actions → CI → Run workflow**. It builds and tests everything as for a
+**Actions → CI → Run workflow**, choosing `main` (the `release`
+environment only lets `main` and version tags use the signing key, so a
+dry run from another branch stops at the release job). It builds and tests everything as for a
 release, then puts the release together as the `release-dry-run`
 artifact, with the version from `pubspec.yaml`, instead of drafting it.
 Before the signing key is set up, a dry run leaves `gpad-update.json`
