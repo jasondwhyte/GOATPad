@@ -158,12 +158,13 @@ Get GPad from [Releases](https://github.com/jasondwhyte/GOATPad/releases):
 
 To check a download, see [docs/releasing.md](docs/releasing.md#checking-a-download).
 
-GPad updates itself. Twice a day it looks for a newer release on GitHub
-and checks it is signed with GPad's key. GPad from the Windows installer
-or zip, and the AppImage, then install it, and it starts the next time you
-open GPad (or click **Restart now**). The .deb can't update itself without
-admin rights, so GPad tells you a new version is out instead. Turn the
-checks off in the window behind the ⓘ button in the sidebar.
+GPad updates itself. Shortly after it opens, and then twice a day (every 12
+hours), it looks for a newer release on GitHub and checks it is signed with
+GPad's key. GPad from the Windows installer or zip, and the AppImage, then
+install it, and it starts the next time you open GPad (or click **Restart
+now**). The .deb can't update itself without admin rights, so GPad tells you
+a new version is out instead. Turn the checks off in the window behind the ⓘ
+button in the sidebar.
 
 ### Test builds
 

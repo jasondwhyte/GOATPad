@@ -86,7 +86,8 @@ class _UpdatesDialog extends StatelessWidget {
                 onChanged: (on) => updater.setAutomatic(on ?? true),
                 title: const Text('Check for updates on its own'),
                 subtitle: const Text(
-                  'Twice a day, GPad looks at its newest release on GitHub. '
+                  'Shortly after it opens, and then twice a day, GPad looks at its newest '
+                  'release on GitHub. '
                   'It sends nothing about you or your notes, and installs '
                   'only releases signed with GPad\'s key.',
                 ),
