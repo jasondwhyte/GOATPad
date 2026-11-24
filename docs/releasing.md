@@ -27,7 +27,8 @@ replace a key that is already there. Then:
 2. Add the private key as the secret `GPAD_UPDATE_SIGNING_KEY` of that
    environment (**Add environment secret**), pasting the whole file,
    `BEGIN` and `END` lines included. (Don't also keep it as a repository
-   secret, which every branch could read.)
+   secret, which every branch could read. The Google secrets below stay
+   repository secrets.)
    Copying it straight to the clipboard is safest, since a selection can
    miss a line and a word processor or chat app can change dashes and
    spaces: `clip < gpad-update-signing-key.pem` on Windows (in Git Bash),

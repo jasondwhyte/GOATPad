@@ -254,10 +254,13 @@ void main() {
     final note = notepad.newNote();
     notepad.editText(note, 'typed, then quit from the tray');
 
-    // More is typed once the upload is under way, with the window open.
+    // More is typed as the upload ends, with the window open: after the
+    // sync round's own last save, so only quitting can save it.
+    var started = false;
     var typed = false;
     void typeMore() {
-      if (typed || sync.status != SyncStatus.syncing) return;
+      if (sync.status == SyncStatus.syncing) started = true;
+      if (typed || !started || sync.status != SyncStatus.synced) return;
       typed = true;
       notepad.editText(note, 'typed, then quit, then more');
     }

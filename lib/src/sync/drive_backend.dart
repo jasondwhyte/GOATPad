@@ -121,6 +121,8 @@ class DriveBackend implements SyncBackend {
     // Once this one's vault file is up, the folder is only deleted if
     // another computer's vault is seen to count instead. A lookup that
     // fails after that may be hiding a vault other computers already use.
+    // (If the lookup finds none yet, the folder stays too, with this one's
+    // vault in it; the next setup or join finds it.)
     var keep = false;
     try {
       final records = await api.create(

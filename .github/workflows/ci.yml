@@ -256,8 +256,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     needs: [smoke-linux, build-windows]
     runs-on: ubuntu-latest
-    # The signing key and Google secrets live in this environment, whose
-    # rules say which branches and tags may use them; see docs/releasing.md.
+    # The update signing key lives in this environment, whose rules say
+    # which branches and tags may use it; see docs/releasing.md.
     environment: release
     permissions:
       contents: write # to draft the release

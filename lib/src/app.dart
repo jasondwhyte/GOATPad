@@ -122,7 +122,8 @@ class _GPadAppState extends State<GPadApp> {
     if (notepad.flush()) {
       await widget.sync?.finish();
       // The window stays open while the upload finishes, so more may have
-      // been typed. If that can't be saved, ask like any other failure.
+      // been typed. That is saved here and goes up next time; if it can't
+      // be saved, ask like any other failure.
       if (notepad.flush()) return true;
     }
     if (context == null) return true;
