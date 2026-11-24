@@ -140,7 +140,6 @@ class _SidebarState extends State<Sidebar> {
           ],
           // Scrolls in a short window instead of overflowing.
           Flexible(
-            flex: 0,
             child: ValueListenableBuilder<bool>(
               valueListenable: notepad.showShortcuts,
               builder: (context, shown, _) => shown
