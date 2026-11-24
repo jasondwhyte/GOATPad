@@ -138,14 +138,15 @@ class _SidebarState extends State<Sidebar> {
             const Divider(),
             _syncRow(context, sync),
           ],
-          // Scrolls in a short window instead of overflowing.
-          Flexible(
-            child: ValueListenableBuilder<bool>(
-              valueListenable: notepad.showShortcuts,
-              builder: (context, shown, _) => shown
-                  ? SingleChildScrollView(child: _shortcuts(theme))
-                  : const SizedBox.shrink(),
-            ),
+          ValueListenableBuilder<bool>(
+            valueListenable: notepad.showShortcuts,
+            builder: (context, shown, _) => shown
+                ? ConstrainedBox(
+                    // Scrolls rather than crowding out the notes list.
+                    constraints: const BoxConstraints(maxHeight: 140),
+                    child: SingleChildScrollView(child: _shortcuts(theme)),
+                  )
+                : const SizedBox.shrink(),
           ),
         ],
       ),
