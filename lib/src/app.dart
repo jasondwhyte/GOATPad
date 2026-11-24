@@ -118,7 +118,6 @@ class _GPadAppState extends State<GPadApp> {
   /// when everything is saved, or the person says to quit anyway.
   Future<bool> _mayQuit() async {
     final notepad = widget.notepad;
-    final context = _navigator.currentContext;
     if (notepad.flush()) {
       await widget.sync?.finish();
       // The window stays open while the upload finishes, so more may have
@@ -126,6 +125,7 @@ class _GPadAppState extends State<GPadApp> {
       // be saved, ask like any other failure.
       if (notepad.flush()) return true;
     }
+    final context = _navigator.currentContext;
     if (context == null) return true;
     final quit = await showDialog<bool>(
       context: context,
