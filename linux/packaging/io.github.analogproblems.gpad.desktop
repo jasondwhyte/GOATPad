@@ -8,4 +8,4 @@ Icon=gpad
 Terminal=false
 Categories=Utility;TextEditor;
 Keywords=notes;notepad;editor;text;code;
-StartupWMClass=gpad
+StartupWMClass=io.github.analogproblems.gpad

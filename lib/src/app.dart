@@ -121,7 +121,9 @@ class _GPadAppState extends State<GPadApp> {
     final context = _navigator.currentContext;
     if (notepad.flush()) {
       await widget.sync?.finish();
-      return true;
+      // The window stays open while the upload finishes, so more may have
+      // been typed. If that can't be saved, ask like any other failure.
+      if (notepad.flush()) return true;
     }
     if (context == null) return true;
     final quit = await showDialog<bool>(

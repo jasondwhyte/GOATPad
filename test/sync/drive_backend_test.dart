@@ -269,6 +269,25 @@ void main() {
       expect(drive.tagged('records'), hasLength(1));
     });
 
+    test('a failed check after the vault is up leaves it', () async {
+      // The vault file is already there for other computers to find, so a
+      // failed check of who won mustn't delete the folder it sits in.
+      drive.before = (request) async {
+        if (request.method == 'POST' &&
+            request.url.path.startsWith('/upload/')) {
+          drive.failNext('GET', '/drive/v3/files', 400);
+        }
+      };
+      await expectLater(
+        backend().createVault(header()),
+        throwsA(isA<SyncBackendException>()),
+      );
+      drive.before = null;
+      expect(drive.tagged('vault'), hasLength(1));
+      expect(drive.tagged('folder'), hasLength(1));
+      expect(await backend().readVault(), header());
+    });
+
     test('of two setting up at once, exactly one wins', () async {
       for (var round = 0; round < 20; round++) {
         drive = FakeDrive();

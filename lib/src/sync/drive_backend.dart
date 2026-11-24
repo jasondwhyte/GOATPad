@@ -118,6 +118,10 @@ class DriveBackend implements SyncBackend {
       appProperties: {_role: 'folder', ...tags},
     );
     var won = false;
+    // Once this one's vault file is up, the folder is only deleted if
+    // another computer's vault is seen to count instead. A lookup that
+    // fails after that may be hiding a vault other computers already use.
+    var keep = false;
     try {
       final records = await api.create(
         name: 'records',
@@ -132,18 +136,20 @@ class DriveBackend implements SyncBackend {
         content: bytes,
         mimeType: 'application/json',
       );
+      keep = true;
       // Another computer may have made one meanwhile. Drive keeps both,
       // and the older counts. (Two of this one's, if Drive made it twice
       // after a retry, count as this one's.)
       final winner = await _vault();
       won = winner?.appProperties[_vaultTag] == id;
+      if (winner != null && !won) keep = false;
       if (won) {
         _recordsFolder = records.id;
         _recordsFolderChecked = true;
       }
       return won;
     } finally {
-      if (!won) {
+      if (!won && !keep) {
         try {
           await api.delete(folder.id);
         } on SyncBackendException {

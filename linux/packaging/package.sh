@@ -10,6 +10,9 @@ packaging="$root/linux/packaging"
 bundle="$root/build/linux/x64/release/bundle"
 out="$(mkdir -p "${1:-$root/dist}" && cd "${1:-$root/dist}" && pwd)"
 work="$(mktemp -d)"
+# The application id (linux/CMakeLists.txt): the window's class and Wayland
+# app id, so the launcher entry must be named after it to match the window.
+app_id=io.github.analogproblems.gpad
 trap 'rm -rf "$work"' EXIT
 
 # appimagetool and the AppImage runtime are downloaded at pinned versions and
@@ -43,7 +46,8 @@ build_deb() {
 
   cp -r "$bundle" "$pkg/opt/gpad"
   ln -s /opt/gpad/gpad "$pkg/usr/bin/gpad"
-  install -m 644 "$packaging/gpad.desktop" "$pkg/usr/share/applications/gpad.desktop"
+  install -m 644 "$packaging/$app_id.desktop" \
+    "$pkg/usr/share/applications/$app_id.desktop"
   install -m 644 "$packaging/gpad.png" "$pkg/usr/share/icons/hicolor/256x256/apps/gpad.png"
   install -m 644 "$packaging/gpad.svg" "$pkg/usr/share/icons/hicolor/scalable/apps/gpad.svg"
 
@@ -72,7 +76,7 @@ build_appimage() {
   local appdir="$work/GPad.AppDir"
   mkdir -p "$appdir"
   cp -r "$bundle" "$appdir/gpad"
-  cp "$packaging/gpad.desktop" "$packaging/gpad.png" "$appdir/"
+  cp "$packaging/$app_id.desktop" "$packaging/gpad.png" "$appdir/"
   ln -s gpad.png "$appdir/.DirIcon"
   cat > "$appdir/AppRun" <<'APPRUN'
 #!/bin/sh

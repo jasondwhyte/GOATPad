@@ -451,6 +451,13 @@ class SyncEngine {
       }
       _tooLarge.remove(state.id);
       final file = await _step(backend.write(state.id, sealed));
+      // A record only ever uploaded from here has no version that came from
+      // elsewhere. Without one, an edit another computer makes to what it
+      // downloaded would meet ours with no common ancestor, and count as a
+      // conflict. What went up first is one they can share.
+      final needsCommon = state.commonVersion == null && data != null;
+      final commonVersion = needsCommon ? jsonEncode(version.toJson()) : null;
+      final common = needsCommon ? jsonEncode(data) : null;
       // If it changed while it was being written, it stays pending, and the
       // next round uploads it again.
       _store.saveSyncState(
@@ -460,6 +467,8 @@ class SyncEngine {
         version: jsonEncode(version.toJson()),
         base: jsonEncode(data),
         remoteTag: file.tag,
+        commonVersion: commonVersion,
+        common: common,
       );
       report.uploaded++;
     }
