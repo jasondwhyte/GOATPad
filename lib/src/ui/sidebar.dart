@@ -88,6 +88,18 @@ class _SidebarState extends State<Sidebar> {
                     onChanged: (a) => notepad.appearance.value = a,
                   ),
                 ),
+                ValueListenableBuilder<bool>(
+                  valueListenable: notepad.showShortcuts,
+                  builder: (context, shown, _) => IconButton(
+                    tooltip: shown
+                        ? 'Hide keyboard shortcuts'
+                        : 'Show keyboard shortcuts',
+                    isSelected: shown,
+                    icon: const Icon(Icons.keyboard_outlined, size: 18),
+                    selectedIcon: const Icon(Icons.keyboard, size: 18),
+                    onPressed: () => notepad.showShortcuts.value = !shown,
+                  ),
+                ),
                 if (widget.updater case final updater?)
                   IconButton(
                     tooltip: 'About GPad and updates',
@@ -121,16 +133,45 @@ class _SidebarState extends State<Sidebar> {
             const Divider(),
             _syncRow(context, sync),
           ],
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Text(
-              'Ctrl+N new note · Ctrl+Shift+V paste as new note · '
-              'Ctrl+W close tab · Ctrl+P search',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.outline,
-              ),
-            ),
+          ValueListenableBuilder<bool>(
+            valueListenable: notepad.showShortcuts,
+            builder: (context, shown, _) =>
+                shown ? _shortcuts(theme) : const SizedBox.shrink(),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// The keyboard shortcuts, one per line, with the keys lined up in a column.
+  Widget _shortcuts(ThemeData theme) {
+    const shortcuts = [
+      ('Ctrl+N', 'New note'),
+      ('Ctrl+Shift+V', 'Paste as new note'),
+      ('Ctrl+W', 'Close tab'),
+      ('Ctrl+P', 'Search'),
+    ];
+    final style = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.outline,
+    );
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 12, 12),
+      child: Table(
+        defaultColumnWidth: const IntrinsicColumnWidth(),
+        children: [
+          for (final (keys, action) in shortcuts)
+            TableRow(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(right: 12, bottom: 2),
+                  child: Text(
+                    keys,
+                    style: style?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                Text(action, style: style),
+              ],
+            ),
         ],
       ),
     );
