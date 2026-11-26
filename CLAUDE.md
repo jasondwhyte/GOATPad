@@ -21,9 +21,11 @@ Dart package keep the name GOATPad (`goatpad`). Public repo, MIT.
 
 - Linux builds run on Ubuntu 22.04 on purpose: a newer build machine raises
   the glibc floor and the app stops starting on 22.04 and Debian 12.
-- The Google client and update key reach the app only as `--dart-define`
-  values from CI secrets (`GPAD_GOOGLE_CLIENT_*`, `GPAD_UPDATE_*`). Never
-  commit them. `GPAD_DATA_DIR` moves the notes folder, for portable copies.
+- Builds get the Google sign-in client from CI secrets
+  (`GPAD_GOOGLE_CLIENT_*`) as `--dart-define` values; never commit it. The
+  update key they carry is the public `tool/update_public_key.pem`; the
+  private signing key (`GPAD_UPDATE_SIGNING_KEY`) is a release secret only.
+- `GPAD_DATA_DIR` moves the notes folder, for portable copies.
 - The version lives in both `pubspec.yaml` and `lib/src/version.dart`; a test
   checks they match.
 - GitHub Actions are pinned to commit SHAs, with the tag in a comment.
