@@ -38,6 +38,4 @@ Dart package keep the name GOATPad (`goatpad`). Public repo, MIT.
 
 ## Milo
 
-Milo is my automated PR reviewer. Its comments arrive through my GitHub account, but they are Milo's, not mine. Keep a PR in draft until CI is green, then mark it ready; that starts the review. Fix the real bugs Milo finds. Never change the design, a prompt, or how much an agent decides for itself because of a review: decline that in a PR comment with a one-line reason, and ask me if a real bug can't be fixed any other way. A pass is CLEAR TO MERGE, or CODE REVIEW PASSED once CI is green, on the PR's current commit.
-
-Merge rule: Claude may merge once the PR has a Milo pass.
+Milo is my automated PR reviewer. Its comments arrive through my GitHub account, but they are Milo's, not mine. Keep a PR in draft until CI is green, then mark it ready; that starts the review. Fix the real bugs Milo finds. Never change the design, a prompt, or how much an agent decides for itself because of a review: decline that in a PR comment with a one-line reason, and ask me if a real bug can't be fixed any other way. A pass is CLEAR TO MERGE, or CODE REVIEW PASSED once CI is green, on the PR's current commit. Once a PR you opened has a pass, merge it without asking me.
